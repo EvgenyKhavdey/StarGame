@@ -36,6 +36,7 @@ public class BaseScreen implements Screen, InputProcessor {
         glBounds = new Rect(0,0,1f,1f);
         worldToGl = new Matrix4();
         screenToWorld = new Matrix3();
+        touch = new  Vector2();
     }
 
     @Override
@@ -147,7 +148,6 @@ public class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        System.out.println("mouseMoved screenX = " + screenX + ", screenY = "+ screenY);
         return false;
     }
 
