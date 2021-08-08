@@ -41,7 +41,7 @@ public class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(1, 0, 0, 1);
+        ScreenUtils.clear(0.4f, 0.24f, 0.51f, 1);
     }
 
     @Override
