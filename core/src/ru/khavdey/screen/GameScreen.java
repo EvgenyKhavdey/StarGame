@@ -7,6 +7,7 @@ import ru.khavdey.bace.BaseScreen;
 import ru.khavdey.math.Rect;
 import ru.khavdey.sprite.Background;
 import ru.khavdey.sprite.Star;
+import ru.khavdey.sprite.StarShip;
 
 public class GameScreen extends BaseScreen {
 
@@ -18,6 +19,7 @@ public class GameScreen extends BaseScreen {
     private TextureAtlas atlas;
 
     private Star[] stars;
+    private StarShip starShip;
 
     @Override
     public void show() {
@@ -25,11 +27,12 @@ public class GameScreen extends BaseScreen {
         bg = new Texture("textures/bg.png");
         background = new Background(bg);
 
-        atlas = new TextureAtlas("textures/menuAtlas.tpack");
+        atlas = new TextureAtlas("textures/mainAtlas.tpack");
         stars = new Star[STAR_COUNT];
         for( int i = 0; i < stars.length; i++){
             stars[i] = new Star(atlas);
         }
+        starShip = new StarShip(atlas);
     }
 
     @Override
@@ -45,6 +48,7 @@ public class GameScreen extends BaseScreen {
         for (Star star : stars ){
             star.resize(worldBounds);
         }
+        starShip.resize(worldBounds);
     }
 
     @Override
@@ -56,11 +60,13 @@ public class GameScreen extends BaseScreen {
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
+        starShip.touchDown(touch, pointer, button);
         return false;
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer, int button) {
+        starShip.touchUp(touch, pointer, button);
         return false;
     }
 
@@ -68,6 +74,7 @@ public class GameScreen extends BaseScreen {
         for (Star star : stars){
             star.update(delta);
         }
+        starShip.update(delta);
     }
 
     private void draw(){
@@ -76,6 +83,7 @@ public class GameScreen extends BaseScreen {
         for( Star star : stars){
             star.draw(batch);
         }
+        starShip.draw(batch);
         batch.end();
     }
 }

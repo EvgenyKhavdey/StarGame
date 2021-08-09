@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
-
 import ru.khavdey.math.MatrixUtils;
 import ru.khavdey.math.Rect;
 
@@ -24,7 +23,6 @@ public class BaseScreen implements Screen, InputProcessor {
     private Matrix3 screenToWorld;
 
     private Vector2 touch;
-
 
     @Override
     public void show() {
@@ -64,8 +62,6 @@ public class BaseScreen implements Screen, InputProcessor {
         System.out.println("worldBounds width = " + worldBounds.getWidth() + " height = " + worldBounds.getHeight());
 
     }
-
-
 
     @Override
     public void pause() {

@@ -2,7 +2,6 @@ package ru.khavdey.sprite;
 
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
-
 import ru.khavdey.bace.Sprite;
 import ru.khavdey.math.Rect;
 import ru.khavdey.math.Rnd;
