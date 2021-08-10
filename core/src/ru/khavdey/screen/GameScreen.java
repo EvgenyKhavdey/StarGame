@@ -5,9 +5,10 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 import ru.khavdey.bace.BaseScreen;
 import ru.khavdey.math.Rect;
+import ru.khavdey.pool.BulletPool;
 import ru.khavdey.sprite.Background;
+import ru.khavdey.sprite.MainShip;
 import ru.khavdey.sprite.Star;
-import ru.khavdey.sprite.StarShip;
 
 public class GameScreen extends BaseScreen {
 
@@ -19,7 +20,8 @@ public class GameScreen extends BaseScreen {
     private TextureAtlas atlas;
 
     private Star[] stars;
-    private StarShip starShip;
+    private BulletPool bulletPool;
+    private MainShip mainShip;
 
     @Override
     public void show() {
@@ -32,13 +34,15 @@ public class GameScreen extends BaseScreen {
         for( int i = 0; i < stars.length; i++){
             stars[i] = new Star(atlas);
         }
-        starShip = new StarShip(atlas);
+        bulletPool = new BulletPool();
+        mainShip = new MainShip(atlas, bulletPool);
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
         update(delta);
+        freeAllDestroyed();
         draw();
     }
 
@@ -48,7 +52,7 @@ public class GameScreen extends BaseScreen {
         for (Star star : stars ){
             star.resize(worldBounds);
         }
-        starShip.resize(worldBounds);
+        mainShip.resize(worldBounds);
     }
 
     @Override
@@ -56,17 +60,30 @@ public class GameScreen extends BaseScreen {
         super.dispose();
         bg.dispose();
         atlas.dispose();
+        bulletPool.dispose();
     }
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
-        starShip.touchDown(touch, pointer, button);
+        mainShip.touchDown(touch, pointer, button);
         return false;
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer, int button) {
-        starShip.touchUp(touch, pointer, button);
+        mainShip.touchUp(touch, pointer, button);
+        return false;
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        mainShip.keyDown(keycode);
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        mainShip.keyUp(keycode);
         return false;
     }
 
@@ -74,7 +91,12 @@ public class GameScreen extends BaseScreen {
         for (Star star : stars){
             star.update(delta);
         }
-        starShip.update(delta);
+        mainShip.update(delta);
+        bulletPool.updateActiveSprites(delta);
+    }
+
+    private void freeAllDestroyed(){
+        bulletPool.freeAllDestroyedActiveSprite();
     }
 
     private void draw(){
@@ -83,7 +105,8 @@ public class GameScreen extends BaseScreen {
         for( Star star : stars){
             star.draw(batch);
         }
-        starShip.draw(batch);
+        mainShip.draw(batch);
+        bulletPool.drawActiveSprites(batch);
         batch.end();
     }
 }
