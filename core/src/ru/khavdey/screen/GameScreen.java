@@ -1,5 +1,7 @@
 package ru.khavdey.screen;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
@@ -23,13 +25,16 @@ public class GameScreen extends BaseScreen {
     private BulletPool bulletPool;
     private MainShip mainShip;
 
+    private Music music;
+
     @Override
     public void show() {
         super.show();
         bg = new Texture("textures/bg.png");
         background = new Background(bg);
-
         atlas = new TextureAtlas("textures/mainAtlas.tpack");
+        music = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
+        music.play();
         stars = new Star[STAR_COUNT];
         for( int i = 0; i < stars.length; i++){
             stars[i] = new Star(atlas);
