@@ -1,6 +1,8 @@
 package ru.khavdey.sprite;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -33,9 +35,14 @@ public class MainShip extends Sprite {
     private  float bulletHeight;
     private int bulletDamage;
 
+    private Sound sound;
+
+    private int a = 6;
+
     public MainShip(TextureAtlas atlas, BulletPool bulletPool) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
         this.bulletPool = bulletPool;
+        sound = Gdx.audio.newSound(Gdx.files.internal("sounds/bullet.wav"));
         bulletRegion = atlas.findRegion("bulletMainShip");
         bulletPos = new Vector2();
         bulletV = new Vector2(0, 0.5f);
@@ -61,6 +68,7 @@ public class MainShip extends Sprite {
         if(getRight() < worldBounds.getLeft()){
             setLeft(worldBounds.getRight());
         }
+        shoot(delta);
     }
 
     @Override
@@ -145,9 +153,9 @@ public class MainShip extends Sprite {
                     stop();
                 }
                 break;
-            case Input.Keys.UP:
-                shoot();
-                break;
+//            case Input.Keys.UP:
+//                shoot();
+//                break;
         }
         return false;
     }
@@ -164,9 +172,15 @@ public class MainShip extends Sprite {
         v.setZero();
     }
 
-    private void shoot(){
-        Bullet bullet = bulletPool.obtain();
-        bulletPos.set(pos.x, pos.y + getHalfHeight());
-        bullet.set(this, bulletRegion, bulletPos, bulletV, bulletHeight, worldBounds, bulletDamage);
+    private void shoot(float delta){
+        if (a > 0){
+           a--;
+        } else {
+            Bullet bullet = bulletPool.obtain();
+            bulletPos.set(pos.x, pos.y + getHalfHeight());
+            bullet.set(this, bulletRegion, bulletPos, bulletV, bulletHeight, worldBounds, bulletDamage);
+            sound.play(1.0f);
+            a = 6;
+        }
     }
 }
