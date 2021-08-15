@@ -6,11 +6,18 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
+
+import java.util.List;
+
 import ru.khavdey.bace.BaseScreen;
+import ru.khavdey.bace.Ship;
+import ru.khavdey.bace.Sprite;
 import ru.khavdey.math.Rect;
 import ru.khavdey.pool.BulletPool;
 import ru.khavdey.pool.EnemyPool;
 import ru.khavdey.sprite.Background;
+import ru.khavdey.sprite.Bullet;
+import ru.khavdey.sprite.EnemyShip;
 import ru.khavdey.sprite.MainShip;
 import ru.khavdey.sprite.Star;
 import ru.khavdey.utils.EnemyEmitter;
@@ -18,6 +25,8 @@ import ru.khavdey.utils.EnemyEmitter;
 public class GameScreen extends BaseScreen {// игровой экран
 
     private static final int STAR_COUNT = 64;
+    private static final float V_LEN = 0.1f;
+    private static final float V_LEN_BULLET = 0.03f;
 
     private Texture bg;
     private Background background;
@@ -46,6 +55,7 @@ public class GameScreen extends BaseScreen {// игровой экран
         for( int i = 0; i < stars.length; i++){
             stars[i] = new Star(atlas);
         }
+
         bulletPool = new BulletPool();
         enemyPool = new EnemyPool(worldBounds, bulletPool);
         laserSound = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
@@ -63,6 +73,7 @@ public class GameScreen extends BaseScreen {// игровой экран
     public void render(float delta) {
         super.render(delta);
         update(delta);
+        checkCollisions();
         freeAllDestroyed();
         draw();
     }
@@ -120,6 +131,28 @@ public class GameScreen extends BaseScreen {// игровой экран
         bulletPool.updateActiveSprites(delta);
         enemyPool.updateActiveSprites(delta);
         enemyEmitter.generate(delta);
+    }
+
+    private void checkCollisions(){
+        List<EnemyShip> activeEnemyShip = enemyPool.getActiveSprites();
+        for (Sprite enemyShip : activeEnemyShip) {
+            if ((mainShip.pos).dst(enemyShip.pos) < V_LEN) {
+                enemyShip.destroy();
+            }
+        }
+        List<Bullet> activeBullet = bulletPool.getActiveSprites();
+        for (Sprite enemyShip : activeEnemyShip){
+            for (Sprite bullet : activeBullet){
+                if((enemyShip.pos).dst((bullet.pos)) < V_LEN_BULLET){
+                    Ship ship = (Ship) enemyShip;
+                    Bullet bl = (Bullet) bullet;
+                    ship.setHp(ship.getHp() - bl.getDamage());
+                    if (ship.getHp() <= 0){
+                        ship.destroy();
+                    }
+                }
+            }
+        }
     }
 
     private void freeAllDestroyed(){

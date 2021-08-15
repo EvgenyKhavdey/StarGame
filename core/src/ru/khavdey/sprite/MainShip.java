@@ -153,11 +153,4 @@ public class MainShip extends Ship {
     private void stop(){// метод остановки
         v.setZero();// метод setZero обнуляет вектор v
     }
-
-    private void shoot(){// метод стрельбы
-            Bullet bullet = bulletPool.obtain();// создаем пулю и добываем ее с помощью метода obtain
-            bulletPos.set(pos.x, pos.y + getHalfHeight());// стрельба из носа корабля
-            bullet.set(this, bulletRegion, bulletPos, bulletV, bulletHeight, worldBounds, bulletDamage);
-            bulletSound.play(1.0f);
-    }
 }
