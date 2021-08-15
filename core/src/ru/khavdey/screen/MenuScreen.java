@@ -1,6 +1,5 @@
 package ru.khavdey.screen;
 
-
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -13,12 +12,11 @@ import ru.khavdey.sprite.ExitButton;
 import ru.khavdey.sprite.PlayButton;
 import ru.khavdey.sprite.Star;
 
-
-public class MenuScreen extends BaseScreen {
+public class MenuScreen extends BaseScreen {// экран меню игры
 
     private static final int STAR_COUNT = 256;
 
-    private final Game game;
+    private final Game game;// для переключения экранов пробросываем ссылку на класс Game
 
     private Texture bg;
     private Background background;
@@ -45,7 +43,7 @@ public class MenuScreen extends BaseScreen {
             stars[i] = new Star(atlas);
         }
         exitButton = new ExitButton(atlas);
-        playButton = new PlayButton(atlas, game);
+        playButton = new PlayButton(atlas, game);// пробрассываем в конструктор PlayButton ссылку на класс Game
     }
 
     @Override

@@ -14,19 +14,19 @@ public class Sprite extends Rect {
     protected TextureRegion[] regions;
     protected int frame;
 
-    private boolean destroyed;
+    private boolean destroyed;// флаг помечающий что объекты в процессе не учавствуют
 
     public Sprite(){
-
     }
 
-    public Sprite(TextureRegion region) {
+    public Sprite(TextureRegion region) {// конструктор, когда передаеся отдана текстура
         regions = new  TextureRegion[1];
         regions[0] = region;
     }
 
-    public Sprite(TextureRegion region, int rows, int cols, int frames){
-        regions = Regions.split(region, rows, cols,frames);
+    public Sprite(TextureRegion region, int rows, int cols, int frames){//конструктор, когда передается несколько текстур. Передается строка и столбец
+                                                                        // необходимой текстуры и колличество (frames) текстур
+        regions = Regions.split(region, rows, cols, frames);
     }
 
     public void setHeightProportion(float height){
@@ -51,7 +51,6 @@ public class Sprite extends Rect {
     }
 
     public void resize(Rect worldBounds){
-
     }
 
     public boolean touchDown(Vector2 touch, int pointer, int button) {
@@ -82,11 +81,11 @@ public class Sprite extends Rect {
         this.scale = scale;
     }
 
-    public void destroy(){
+    public void destroy(){// метод помечает объект на удаление, для перемещение в список свободных объектов
         destroyed = true;
     }
 
-    public void flushDestroy(){
+    public void flushDestroy(){// метод помечает объект как активный, для перемещение в список активных объектов
         destroyed = false;
     }
 

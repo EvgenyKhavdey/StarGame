@@ -2,30 +2,29 @@ package ru.khavdey.sprite;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-
 import ru.khavdey.bace.Sprite;
 import ru.khavdey.math.Rect;
 
 public class Bullet extends Sprite {
 
-    private Rect worldBounds;
-    private Vector2 v;
-    private int damage;
-    private Sprite owner;
+    private Rect worldBounds;// границы игравого мира
+    private Vector2 v;// вектор скорости
+    private int damage;// урон пули
+    private Sprite owner;// владелец пули
 
     public Bullet() {
         regions = new TextureRegion[1];
         v = new Vector2();
     }
 
-    public void set(
-            Sprite owner,
-            TextureRegion region,
-            Vector2 pos0,
-            Vector2 v0,
-            float height,
-            Rect worldBounds,
-            int damage
+    public void set(// метод для инициилизации пули
+            Sprite owner,// передаем владельца пули (наша или врага)
+            TextureRegion region,// текстура пули (наша или врага)
+            Vector2 pos0,// начальная позиция пули
+            Vector2 v0,// начальная скорость пули
+            float height,// размер пули
+            Rect worldBounds,// границы игравого мира
+            int damage// урон, который наносится
     ){
         this.owner = owner;
         this.regions[0] = region;
@@ -38,9 +37,9 @@ public class Bullet extends Sprite {
 
     @Override
     public void update(float delta) {
-        super.pos.mulAdd(v, delta);
-        if(isOutside(worldBounds)){
-            destroy();
+        super.pos.mulAdd(v, delta);//
+        if(isOutside(worldBounds)){// проверяем выход пули за пределы игрового пространства
+            destroy();//после выхода пули за пределы игрового пространства помечаем ее флагом на добавление в список свободных объектов
         }
     }
 

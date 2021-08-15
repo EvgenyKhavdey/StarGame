@@ -3,11 +3,13 @@ package ru.khavdey.utils;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 public class Regions {
-    public static TextureRegion[] split(TextureRegion region, int rows, int cols, int frames) {
+    public static TextureRegion[] split(TextureRegion region, int rows, int cols, int frames) {//раскладывает текстуру с массив, в тукстуре картнки
+                                                                                               //разбиваются на отдельные картинки и каждая картикка
+                                                                                                // в массив
         if(region == null) throw new RuntimeException("Split null region");
         TextureRegion[] regions = new TextureRegion[frames];
-        int tileWidth = region.getRegionWidth() / cols;
-        int tileHeight = region.getRegionHeight() / rows;
+        int tileWidth = region.getRegionWidth() / cols;// столбцы
+        int tileHeight = region.getRegionHeight() / rows;// строки
 
         int frame = 0;
         for (int i = 0; i < rows; i++) {
