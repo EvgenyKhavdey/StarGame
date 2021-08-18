@@ -7,14 +7,17 @@ import com.badlogic.gdx.math.Vector2;
 import ru.khavdey.bace.Ship;
 import ru.khavdey.math.Rect;
 import ru.khavdey.pool.BulletPool;
+import ru.khavdey.screen.ExplosionPool;
 
-public class EnemyShip extends Ship {
+public class EnemyShip extends Ship {              // создаем корабль противников
 
-    public EnemyShip(Rect worldBounds, BulletPool bulletPool) {
+    public EnemyShip(Rect worldBounds, BulletPool bulletPool, ExplosionPool explosionPool) {
         super();
         this.worldBounds = worldBounds;
         this.bulletPool = bulletPool;
+        this.explosionPool = explosionPool;
     }
+
 
     @Override
     public void update(float delta) {
@@ -28,8 +31,8 @@ public class EnemyShip extends Ship {
             destroy();                              // если дошел, стираем корабль
         }
         bulletPos.set(pos.x, pos.y - getHalfHeight());// струльба из носа корабля
-
     }
+
 
     public void set(
             TextureRegion[] regions,   // текстура корабля
@@ -54,6 +57,27 @@ public class EnemyShip extends Ship {
         setHeightProportion(height);
         this.hp = hp;
         v.set(0, -0.4f);               // изначальная скорость вновь сгенерируемых кораблей, позволяющая им быстро выезжать с верхней части экрана
-        bulletPos.set(pos.x, pos.y + getHalfHeight());
+    }
+
+    public void setPos(float x, float y) { // метод для удаления бага (пули создавались на троектории уничтоженного корабля)
+        pos.set(x, y);
+        bulletPos.set(pos.x, pos.y - getHalfHeight());  // bulletPos при создании нового корабля получает значение траектории нового корабля
+    }
+                                // данный метод нужен чтобы попадаемые пули в корабль на экране долетали до коробля, а не уничтожались на растоянии
+
+    @Override
+    public boolean isBulletCollision(Bullet bullet) {
+        return !(
+                bullet.getRight() < getLeft()
+                        || bullet.getLeft() > getRight()               //поля доходит ровно от левого края до правого
+                        || bullet.getBottom() > getTop()
+                        || bullet.getTop() < pos.y                     // столкновение с пулей будет происходить в центра корабля
+        );
+    }
+
+    @Override
+    public void destroy() {  // устраненме бага двойного выстрела
+        super.destroy();
+        reloadTimer = 0f;    // обнуление таймера выстрела при уничтожении корабля
     }
 }

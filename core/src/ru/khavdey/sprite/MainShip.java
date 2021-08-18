@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import ru.khavdey.bace.Ship;
 import ru.khavdey.math.Rect;
 import ru.khavdey.pool.BulletPool;
+import ru.khavdey.screen.ExplosionPool;
 
 public class MainShip extends Ship {
 
@@ -22,17 +23,18 @@ public class MainShip extends Ship {
     private int leftPointer = INVALID_POINTER;                             // константа запоминает левый палец
     private int rightPointer = INVALID_POINTER;                            // константа запоминает правый палец
 
-    public MainShip(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound) {
+    public MainShip(TextureAtlas atlas, BulletPool bulletPool, ExplosionPool explosionPool, Sound bulletSound) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);// вызываем конструктор супер класа, который возвращает массив текстур
         this.bulletPool = bulletPool;
+        this.explosionPool = explosionPool;
         bulletRegion = atlas.findRegion("bulletMainShip");
         this.bulletSound = bulletSound;
         bulletV.set(0, 0.5f);
         bulletHeight = 0.01f;
         bulletDamage = 1;
-        reloadInterval = RELOAD_INTERVAL;
+        reloadInterval = RELOAD_INTERVAL;                                  // задается интервал стрельбы пули
         v0.set(0.5f, 0);                                                   // констаннтная скорость движения вправо
-        hp = 100;
+        hp = 1;
     }
 
     @Override
@@ -140,6 +142,17 @@ public class MainShip extends Ship {
                 break;
         }
         return false;
+    }
+
+             // данный метод нужен чтобы попадаемые пули в корабль на экране долетали до коробля, а не уничтожались на растоянии
+    @Override
+    public boolean isBulletCollision(Bullet bullet) {
+        return !(
+                bullet.getRight() < getLeft()
+                        || bullet.getLeft() > getRight()            // поля доходит ровно от левого края до правого
+                        || bullet.getBottom() > pos.y               // столкновение с пулей будет происходить в центра корабля
+                        || bullet.getTop() < getBottom()
+        );
     }
 
     private void moveRight(){// метод движения вправо

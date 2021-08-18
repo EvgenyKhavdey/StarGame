@@ -107,11 +107,11 @@ public class EnemyEmitter {
                         ENEMY_BIG_HP
                 );
             }
-            enemy.pos.x = Rnd.nextFloat(                                    // позицианируем корабль по оси Х в случайном порядке
+            float posX = Rnd.nextFloat(                                    // позицианируем корабль по оси Х в случайном порядке
                     worldBounds.getLeft() + enemy.getHalfWidth(),           // корабль не выезжает за пределы экрана
                     worldBounds.getRight() - enemy.getHalfWidth()
             );
-            enemy.setBottom(worldBounds.getTop());
+            enemy.setPos(posX, worldBounds.getTop());
         }
     }
 }

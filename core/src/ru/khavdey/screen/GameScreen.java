@@ -10,7 +10,6 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.List;
 
 import ru.khavdey.bace.BaseScreen;
-import ru.khavdey.bace.Ship;
 import ru.khavdey.bace.Sprite;
 import ru.khavdey.math.Rect;
 import ru.khavdey.pool.BulletPool;
@@ -22,11 +21,10 @@ import ru.khavdey.sprite.MainShip;
 import ru.khavdey.sprite.Star;
 import ru.khavdey.utils.EnemyEmitter;
 
-public class GameScreen extends BaseScreen {// игровой экран
+public class GameScreen extends BaseScreen {                              // игровой экран
 
     private static final int STAR_COUNT = 64;
-    private static final float V_LEN = 0.1f;
-    private static final float V_LEN_BULLET = 0.03f;
+
 
     private Texture bg;
     private Background background;
@@ -35,11 +33,13 @@ public class GameScreen extends BaseScreen {// игровой экран
 
     private Star[] stars;
     private BulletPool bulletPool;
+    private ExplosionPool explosionPool;
     private EnemyPool enemyPool;
     private MainShip mainShip;
 
     private Sound bulletSound;
     private Sound laserSound;
+    private Sound explosionSound;
     private Music music;
 
     private EnemyEmitter enemyEmitter;
@@ -57,15 +57,17 @@ public class GameScreen extends BaseScreen {// игровой экран
         }
 
         bulletPool = new BulletPool();
-        enemyPool = new EnemyPool(worldBounds, bulletPool);
+        explosionSound = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion.wav"));
+        explosionPool = new ExplosionPool(atlas, explosionSound);
+        enemyPool = new EnemyPool(worldBounds, bulletPool, explosionPool);
         laserSound = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
-        mainShip = new MainShip(atlas, bulletPool, laserSound);
+        mainShip = new MainShip(atlas, bulletPool, explosionPool, laserSound);
 
         bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/bullet.wav"));
         enemyEmitter = new EnemyEmitter(worldBounds, bulletSound, enemyPool, atlas);
 
         music = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
-        music.setLooping(true);// настройка, музыка повторяется после завершения
+        music.setLooping(true);                                                                    // настройка, музыка повторяется после завершения
         music.play();
     }
 
@@ -93,10 +95,12 @@ public class GameScreen extends BaseScreen {// игровой экран
         bg.dispose();
         atlas.dispose();
         bulletPool.dispose();
+        explosionPool.dispose();
         enemyPool.dispose();
-        music.dispose();
+        explosionSound.dispose();
         laserSound.dispose();
         bulletSound.dispose();
+        music.dispose();
     }
 
     @Override
@@ -127,48 +131,72 @@ public class GameScreen extends BaseScreen {// игровой экран
         for (Star star : stars){
             star.update(delta);
         }
-        mainShip.update(delta);
-        bulletPool.updateActiveSprites(delta);
-        enemyPool.updateActiveSprites(delta);
-        enemyEmitter.generate(delta);
+        explosionPool.updateActiveSprites(delta);
+        if (!mainShip.isDestroyed()) {
+            mainShip.update(delta);
+            bulletPool.updateActiveSprites(delta);
+            enemyPool.updateActiveSprites(delta);
+            enemyEmitter.generate(delta);
+        }
     }
 
-    private void checkCollisions(){
-        List<EnemyShip> activeEnemyShip = enemyPool.getActiveSprites();
-        for (Sprite enemyShip : activeEnemyShip) {
-            if ((mainShip.pos).dst(enemyShip.pos) < V_LEN) {
-                enemyShip.destroy();
+    private void checkCollisions(){                                                  // образотка колизий (пересечения объектов игре)
+        if (mainShip.isDestroyed()) {
+            return;
+        }
+                        //проверяем пересечение корабля пользователя с кораблем противнака
+        List<EnemyShip> enemyShipList = enemyPool.getActiveSprites();                // получаем список активных вражеских кораблей
+        for (EnemyShip enemyShip : enemyShipList){                                      // проходим по списку активных вражеских кораблей
+            if (enemyShip.isDestroyed()){
+                continue;
+            }
+            float miniDist = enemyShip.getHalfWidth() + mainShip.getHalfWidth();       // минимальная дистанция между кораблями
+            if(mainShip.pos.dst(enemyShip.pos) < miniDist) {                           // проверяем что корабль пользователя и вражеский корабль столкнулись
+                mainShip.damage(enemyShip.getBulletDamage() * 2);                       // нанесение урона кораблю пользователя
+                enemyShip.destroy();                                                   // уничтожение вражеского корабля
             }
         }
-        List<Bullet> activeBullet = bulletPool.getActiveSprites();
-        for (Sprite enemyShip : activeEnemyShip){
-            for (Sprite bullet : activeBullet){
-                if((enemyShip.pos).dst((bullet.pos)) < V_LEN_BULLET){
-                    Ship ship = (Ship) enemyShip;
-                    Bullet bl = (Bullet) bullet;
-                    ship.setHp(ship.getHp() - bl.getDamage());
-                    if (ship.getHp() <= 0){
-                        ship.destroy();
-                    }
+                         //проверяем пересечение пули корабля пользователя с кораблем противнака
+        List<Bullet> bulletList = bulletPool.getActiveSprites();                       // получаем список активных пуль
+        for (Bullet bullet : bulletList){                                              // проходим по списку активных пуль
+            if(bullet.isDestroyed()){
+                continue;
+            }
+            for (EnemyShip enemyShip : enemyShipList){                                 // проверяем какому вражескому кораблю эта пуля пренадлежит
+                if (enemyShip.isDestroyed() || bullet.getOwner() != mainShip){         // проверяем что пуля принадлежит кораблю пользователя
+                    continue;
                 }
+                if (enemyShip.isBulletCollision(bullet)) {                             // если пуля корабля пользователя попала во вражеский корабль
+                    enemyShip.damage(bullet.getDamage());                              // наносим урон кораблю
+                    bullet.destroy();                                                  // пуля уберается, чтобы не насосить урон дальше
+                }
+            }
+                          //проверяем пересечение пули вражеского корабля с кораблем пользователя
+            if (bullet.getOwner() != mainShip && mainShip.isBulletCollision(bullet)){  //проверяем сто пуля не пренадлежит кораблю пользователя и используем метод столкновения пули с короблем
+                mainShip.damage(bullet.getDamage());                                   // наносим урон кораблю
+                bullet.destroy();                                                      // пуля уберается, чтобы не насосить урон дальше
             }
         }
     }
 
     private void freeAllDestroyed(){
         bulletPool.freeAllDestroyedActiveSprite();
+        explosionPool.freeAllDestroyedActiveSprite();
         enemyPool.freeAllDestroyedActiveSprite();
     }
 
     private void draw(){
         batch.begin();
         background.draw(batch);
-        for( Star star : stars){
+        for( Star star : stars) {
             star.draw(batch);
         }
-        mainShip.draw(batch);
-        bulletPool.drawActiveSprites(batch);
-        enemyPool.drawActiveSprites(batch);
+        if (!mainShip.isDestroyed()){
+            mainShip.draw(batch);
+            bulletPool.drawActiveSprites(batch);
+            enemyPool.drawActiveSprites(batch);
+        }
+        explosionPool.drawActiveSprites(batch);
         batch.end();
     }
 }
