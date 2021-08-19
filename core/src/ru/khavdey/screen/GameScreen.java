@@ -17,7 +17,9 @@ import ru.khavdey.pool.EnemyPool;
 import ru.khavdey.sprite.Background;
 import ru.khavdey.sprite.Bullet;
 import ru.khavdey.sprite.EnemyShip;
+import ru.khavdey.sprite.GameOver;
 import ru.khavdey.sprite.MainShip;
+import ru.khavdey.sprite.NewGameButton;
 import ru.khavdey.sprite.Star;
 import ru.khavdey.utils.EnemyEmitter;
 
@@ -28,6 +30,8 @@ public class GameScreen extends BaseScreen {                              // и�
 
     private Texture bg;
     private Background background;
+    private GameOver gameOver;
+    private NewGameButton newGameButton;
 
     private TextureAtlas atlas;
 
@@ -55,7 +59,7 @@ public class GameScreen extends BaseScreen {                              // и�
         for( int i = 0; i < stars.length; i++){
             stars[i] = new Star(atlas);
         }
-
+        gameOver = new GameOver(atlas, worldBounds);
         bulletPool = new BulletPool();
         explosionSound = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion.wav"));
         explosionPool = new ExplosionPool(atlas, explosionSound);
@@ -65,6 +69,7 @@ public class GameScreen extends BaseScreen {                              // и�
 
         bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/bullet.wav"));
         enemyEmitter = new EnemyEmitter(worldBounds, bulletSound, enemyPool, atlas);
+        newGameButton = new NewGameButton(atlas, worldBounds, this);
 
         music = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
         music.setLooping(true);                                                                    // настройка, музыка повторяется после завершения
@@ -101,17 +106,20 @@ public class GameScreen extends BaseScreen {                              // и�
         laserSound.dispose();
         bulletSound.dispose();
         music.dispose();
+
     }
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
         mainShip.touchDown(touch, pointer, button);
+        newGameButton.touchDown(touch, pointer, button);
         return false;
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer, int button) {
         mainShip.touchUp(touch, pointer, button);
+        newGameButton.touchUp(touch, pointer, button);
         return false;
     }
 
@@ -137,7 +145,16 @@ public class GameScreen extends BaseScreen {                              // и�
             bulletPool.updateActiveSprites(delta);
             enemyPool.updateActiveSprites(delta);
             enemyEmitter.generate(delta);
+        } else {
+            newGame(delta);
         }
+    }
+
+    private void newGame(float delta) {
+        gameOver.update(delta);
+        newGameButton.update(delta);
+        bulletPool.destroyedActiveSprite();
+        enemyPool.destroyedActiveSprite();
     }
 
     private void checkCollisions(){                                                  // образотка колизий (пересечения объектов игре)
@@ -145,14 +162,14 @@ public class GameScreen extends BaseScreen {                              // и�
             return;
         }
                         //проверяем пересечение корабля пользователя с кораблем противнака
-        List<EnemyShip> enemyShipList = enemyPool.getActiveSprites();                // получаем список активных вражеских кораблей
+        List<EnemyShip> enemyShipList = enemyPool.getActiveSprites();                   // получаем список активных вражеских кораблей
         for (EnemyShip enemyShip : enemyShipList){                                      // проходим по списку активных вражеских кораблей
             if (enemyShip.isDestroyed()){
                 continue;
             }
             float miniDist = enemyShip.getHalfWidth() + mainShip.getHalfWidth();       // минимальная дистанция между кораблями
             if(mainShip.pos.dst(enemyShip.pos) < miniDist) {                           // проверяем что корабль пользователя и вражеский корабль столкнулись
-                mainShip.damage(enemyShip.getBulletDamage() * 2);                       // нанесение урона кораблю пользователя
+                mainShip.damage(enemyShip.getBulletDamage() * 2);                      // нанесение урона кораблю пользователя
                 enemyShip.destroy();                                                   // уничтожение вражеского корабля
             }
         }
@@ -195,8 +212,16 @@ public class GameScreen extends BaseScreen {                              // и�
             mainShip.draw(batch);
             bulletPool.drawActiveSprites(batch);
             enemyPool.drawActiveSprites(batch);
+        } else {
+            gameOver.draw(batch);
+            newGameButton.draw(batch);
         }
         explosionPool.drawActiveSprites(batch);
         batch.end();
+    }
+
+    public void newMainShip(){
+        mainShip.flushDestroy();
+        mainShip.setHp(1);
     }
 }
