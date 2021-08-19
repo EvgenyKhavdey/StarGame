@@ -19,7 +19,7 @@ public abstract class Ship extends Sprite {
 
     protected  Rect worldBounds;
     protected  BulletPool bulletPool;
-    protected ExplosionPool explosionPool;
+    protected  ExplosionPool explosionPool;
     protected  TextureRegion bulletRegion;
     protected  Vector2 bulletPos;
     protected  Vector2 bulletV;
@@ -101,5 +101,9 @@ public abstract class Ship extends Sprite {
     private void boom() {                             // метод запускающий взрыв
         Explosion explosion = explosionPool.obtain();
         explosion.set(pos, getHeight());
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
     }
 }

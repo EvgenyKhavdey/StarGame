@@ -60,6 +60,12 @@ public abstract class SpritesPool<T extends Sprite> {// абстрактный �
         freeSprites.clear();
     }
 
+    public void destroyedActiveSprite(){
+        for (Sprite sprite : activeSprites){
+            sprite.destroy();
+        }
+    }
+
     public List<T> getActiveSprites() {// геттер для списка активных объектов
         return activeSprites;
     }

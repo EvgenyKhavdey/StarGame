@@ -81,11 +81,11 @@ public class Sprite extends Rect {
         this.scale = scale;
     }
 
-    public void destroy(){// метод помечает объект на удаление, для перемещение в список свободных объектов
+    public void destroy(){                                                         // метод помечает объект на удаление, для перемещение в список свободных объектов
         destroyed = true;
     }
 
-    public void flushDestroy(){// метод помечает объект как активный, для перемещение в список активных объектов
+    public void flushDestroy(){                                                   // метод помечает объект как активный, для перемещение в список активных объектов
         destroyed = false;
     }
 
