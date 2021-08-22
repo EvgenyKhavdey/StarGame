@@ -23,10 +23,11 @@ public class Explosion extends Sprite {  // взрыв
         this.pos.set(pos);
         setHeightProportion(height);
         explosionSound.play();
+        frame = 0;
     }
 
     @Override
-    public void update(float delta) {
+    public void update(float delta) {                // метод где проигрываются взрывы
         animateTimer += delta;
         if (animateTimer >= ANIMATE_INTERVAL) {
             animateTimer = 0f;

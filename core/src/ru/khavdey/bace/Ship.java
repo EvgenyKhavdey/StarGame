@@ -92,6 +92,10 @@ public abstract class Ship extends Sprite {
         boom();
     }
 
+    public int getHp() {
+        return hp;
+    }
+
     private void shoot(){                             // метод стрельбы
         Bullet bullet = bulletPool.obtain();          // создаем пулю и добываем ее с помощью метода obtain
         bullet.set(this, bulletRegion, bulletPos, bulletV, bulletHeight, worldBounds, bulletDamage);
